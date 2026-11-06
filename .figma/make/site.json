@@ -1,0 +1,11 @@
+{
+  "title": "Agendamento de Suporte Técnico",
+  "description": "Agende assistência técnica para computadores, internet e periféricos: descreva o problema, envie fotos, escolha local e horário, e acompanhe seus pedidos.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
