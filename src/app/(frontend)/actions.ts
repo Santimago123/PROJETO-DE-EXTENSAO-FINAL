@@ -4,6 +4,7 @@ import config from '@payload-config'
 import { appAuth } from '@/lib/app-auth'
 import { getEarliestScheduleDate, isBusinessDate } from '@/lib/scheduling'
 import { getPayload } from 'payload'
+import { criarChamadoNaAgenda } from '@/lib/googleCalendar'
 
 type ActionResult = {
   ok: boolean
@@ -11,6 +12,7 @@ type ActionResult = {
   reset?: 'request' | 'session'
   user?: { id: string; name: string; email: string }
   request?: Record<string, unknown>
+  calendarSynced?: boolean
 }
 
 type MunicipalityResult = {
@@ -160,6 +162,36 @@ export async function createServiceRequest(form: FormData): Promise<ActionResult
       user,
       overrideAccess: false,
     })
+
+    let calendarSynced = false
+
+    try {
+      await criarChamadoNaAgenda({
+        cliente: String(user.name || user.email || 'Cliente'),
+        telefone: whatsapp,
+        descricao: request.description,
+        observacao: [
+          `Categoria: ${request.category}`,
+          text(form, 'deviceModel')
+            ? `Equipamento: ${text(form, 'deviceModel')}`
+            : '',
+          text(form, 'operatingSystem')
+            ? `Sistema operacional: ${text(form, 'operatingSystem')}`
+            : '',
+          text(form, 'complement')
+            ? `Complemento: ${text(form, 'complement')}`
+            : '',
+        ]
+          .filter(Boolean)
+          .join('\n'),
+        dataHora: request.scheduledFor,
+      })
+
+      calendarSynced = true
+    } catch (error) {
+      console.error('Chamado salvo, mas falhou a sincronização com o Google Agenda:', error)
+    }
+
     return {
       ok: true,
       request: {
@@ -172,6 +204,7 @@ export async function createServiceRequest(form: FormData): Promise<ActionResult
         status: request.status,
         createdAt: request.createdAt,
       },
+      calendarSynced,
     }
   } catch {
     return { ok: false, reset: 'request' }

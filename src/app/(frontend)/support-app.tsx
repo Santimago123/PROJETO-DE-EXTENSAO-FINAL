@@ -1,5 +1,6 @@
 'use client'
 
+const [horarioSelecionado, setHorarioSelecionado] = useState('09:00'); // valor padrão inicial
 import Image from 'next/image'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
