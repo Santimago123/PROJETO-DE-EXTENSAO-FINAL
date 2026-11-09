@@ -38,6 +38,7 @@ export function SupportApp({ initialUser, initialRequests }: Props) {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [category, setCategory] = useState('')
   const [form, setForm] = useState<Record<string, string>>({})
+  const [horarioSelecionado, setHorarioSelecionado] = useState('09:00');
   const [photos, setPhotos] = useState<File[]>([])
   const [message, setMessage] = useState('')
   const [authEmail, setAuthEmail] = useState('')
