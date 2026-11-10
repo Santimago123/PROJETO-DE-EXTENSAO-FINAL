@@ -1,6 +1,5 @@
 'use client'
 
-const [horarioSelecionado, setHorarioSelecionado] = useState('09:00'); // valor padrão inicial
 import Image from 'next/image'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -38,7 +37,7 @@ export function SupportApp({ initialUser, initialRequests }: Props) {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [category, setCategory] = useState('')
   const [form, setForm] = useState<Record<string, string>>({})
-  const [horarioSelecionado, setHorarioSelecionado] = useState('09:00');
+  const [horarioSelecionado, setHorarioSelecionado] = useState('09:00')
   const [photos, setPhotos] = useState<File[]>([])
   const [message, setMessage] = useState('')
   const [authEmail, setAuthEmail] = useState('')
@@ -226,8 +225,13 @@ export function SupportApp({ initialUser, initialRequests }: Props) {
         ) : (
           <section className="mx-auto max-w-4xl">
             <div className="mb-8">
-              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400"><span>Etapa {step} de 4</span><span>{step * 25}% concluído</span></div>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-[#4169E1] transition-all" style={{ width: `${step * 25}%` }} /></div>
+              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
+                <span>Etapa {step} de 4</span>
+                <span>{step * 25}% concluído</span>
+              </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
+                <div className="h-full rounded-full bg-[#4169E1] transition-all" style={{ width: `${step * 25}%` }} />
+              </div>
             </div>
 
             <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
