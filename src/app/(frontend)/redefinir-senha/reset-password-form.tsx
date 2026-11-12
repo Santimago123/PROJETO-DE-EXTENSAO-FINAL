@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useActionState, useEffect } from 'react'
-import { initialPasswordActionState, resetPassword } from '../auth-actions'
+import { resetPassword } from '../auth-actions'
+import { initialPasswordActionState } from '../password-action-state'
 
 export function ResetPasswordForm() {
   const router = useRouter()

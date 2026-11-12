@@ -3,16 +3,7 @@
 import config from '@payload-config'
 import { appAuth } from '@/lib/app-auth'
 import { getPayload } from 'payload'
-
-export type PasswordActionState = {
-  status: 'idle' | 'error' | 'success'
-  message: string
-}
-
-export const initialPasswordActionState: PasswordActionState = {
-  status: 'idle',
-  message: '',
-}
+import type { PasswordActionState } from './password-action-state'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
