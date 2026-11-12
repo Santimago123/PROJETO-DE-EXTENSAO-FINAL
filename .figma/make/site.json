@@ -1,6 +1,5 @@
 {
-  "title": "Agendamento de Suporte Técnico",
-  "description": "Agende assistência técnica para computadores, internet e periféricos: descreva o problema, envie fotos, escolha local e horário, e acompanhe seus pedidos.",
+  "description": "A project setup and verification workspace that helps teams prepare imported apps for reliable deployment and preview.",
   "robots": {
     "index": false
   },
