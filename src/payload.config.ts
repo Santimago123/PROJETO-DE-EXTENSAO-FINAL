@@ -10,11 +10,13 @@ import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 import { RequestFiles } from './collections/RequestFiles'
 import { ServiceRequests } from './collections/ServiceRequests'
+import { resendEmailAdapter } from './lib/resend-email-adapter'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildFigmaConfig({
+  email: resendEmailAdapter,
   admin: {
     user: Admins.slug,
     constrainWidth: true,
@@ -31,7 +33,7 @@ export default buildFigmaConfig({
   },
   i18n: {
     fallbackLanguage: 'en',
-    supportedLanguages: { 'en': adminLanguage },
+    supportedLanguages: { en: adminLanguage },
   },
   collections: [Admins, Users, ServiceRequests, RequestFiles, Media, Folders, Tags],
   typescript: {
