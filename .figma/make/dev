@@ -11,4 +11,4 @@ set -euo pipefail
 # up any new components the alpha @payloadcms/figma exposes.
 pnpm generate:importmap || echo "[dev] generate:importmap skipped (Payload backend not connected yet)"
 
-pnpm run dev
+exec pnpm run dev
