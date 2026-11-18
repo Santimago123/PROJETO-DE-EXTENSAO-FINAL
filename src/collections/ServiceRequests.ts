@@ -9,11 +9,19 @@ const ownRequests: Access = ({ req }) => {
 
 export const ServiceRequests: CollectionConfig = {
   slug: 'service-requests',
+  labels: {
+    singular: 'Chamado',
+    plural: 'Chamados',
+  },
   admin: {
     group: 'Atendimento',
     useAsTitle: 'protocol',
-    defaultColumns: ['protocol', 'category', 'status', 'scheduledFor'],
+    defaultColumns: ['protocol', 'status'],
+    description: 'Clique no protocolo para abrir o chamado e atualizar o status.',
   },
+  disableBulkDelete: true,
+  disableBulkEdit: true,
+  disableDuplicate: true,
   access: {
     create: ({ req }) => req.user?.collection === 'users',
     read: ownRequests,
@@ -38,15 +46,22 @@ export const ServiceRequests: CollectionConfig = {
   fields: [
     {
       name: 'protocol',
+      label: 'Protocolo',
       type: 'text',
       required: true,
       unique: true,
       index: true,
+      admin: {
+        disabled: {
+          field: true,
+          filter: true,
+          groupBy: true,
+          bulkEdit: true,
+        },
+      },
       access: { create: () => false, update: () => false },
       hooks: {
-        beforeChange: [
-          ({ value }) => value || `CH-${Date.now().toString(36).toUpperCase()}`,
-        ],
+        beforeChange: [({ value }) => value || `CH-${Date.now().toString(36).toUpperCase()}`],
       },
     },
     {
@@ -55,10 +70,11 @@ export const ServiceRequests: CollectionConfig = {
       relationTo: 'users',
       required: true,
       index: true,
+      admin: { disabled: true },
       access: { create: () => false, update: () => false },
       hooks: {
         beforeChange: [
-          ({ req, value }) => req.user?.collection === 'users' ? req.user.id : value,
+          ({ req, value }) => (req.user?.collection === 'users' ? req.user.id : value),
         ],
       },
     },
@@ -66,6 +82,7 @@ export const ServiceRequests: CollectionConfig = {
       name: 'category',
       type: 'select',
       required: true,
+      admin: { disabled: true },
       options: [
         { label: 'Computador / Notebook', value: 'computer' },
         { label: 'Internet / Wi-Fi / Roteador', value: 'network' },
@@ -74,16 +91,22 @@ export const ServiceRequests: CollectionConfig = {
         { label: 'Outro / Não sei identificar', value: 'other' },
       ],
     },
-    { name: 'description', type: 'textarea', required: true },
+    {
+      name: 'description',
+      type: 'textarea',
+      required: true,
+      admin: { disabled: true },
+    },
     {
       name: 'whatsapp',
       type: 'text',
       admin: {
+        disabled: true,
         description: 'Contato usado para negociar o horário do atendimento.',
       },
     },
-    { name: 'deviceModel', type: 'text' },
-    { name: 'operatingSystem', type: 'text' },
+    { name: 'deviceModel', type: 'text', admin: { disabled: true } },
+    { name: 'operatingSystem', type: 'text', admin: { disabled: true } },
     {
       name: 'photos',
       type: 'relationship',
@@ -92,10 +115,12 @@ export const ServiceRequests: CollectionConfig = {
       required: true,
       minRows: 5,
       maxRows: 5,
+      admin: { disabled: true },
     },
     {
       name: 'address',
       type: 'group',
+      admin: { disabled: true },
       fields: [
         { name: 'street', type: 'text', required: true },
         { name: 'number', type: 'text', required: true },
@@ -110,6 +135,7 @@ export const ServiceRequests: CollectionConfig = {
       type: 'date',
       required: true,
       admin: {
+        disabled: true,
         date: {
           pickerAppearance: 'dayOnly',
         },
@@ -117,16 +143,15 @@ export const ServiceRequests: CollectionConfig = {
     },
     {
       name: 'status',
+      label: 'Status',
       type: 'select',
       required: true,
       defaultValue: 'received',
       access: { create: () => false, update: ({ req }) => req.user?.collection === 'admins' },
       options: [
         { label: 'Solicitação recebida', value: 'received' },
-        { label: 'Visita agendada', value: 'scheduled' },
-        { label: 'Em atendimento', value: 'in_progress' },
-        { label: 'Concluído', value: 'completed' },
-        { label: 'Cancelado', value: 'cancelled' },
+        { label: 'Concluída', value: 'completed' },
+        { label: 'Cancelada', value: 'cancelled' },
       ],
     },
   ],

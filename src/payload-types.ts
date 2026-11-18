@@ -244,6 +244,8 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Clique no protocolo para abrir o chamado e atualizar o status.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "service-requests".
  */
@@ -269,7 +271,7 @@ export interface ServiceRequest {
     complement?: string | null;
   };
   scheduledFor: string;
-  status: 'received' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'received' | 'completed' | 'cancelled';
   createdBy?:
     | ({
         relationTo: 'admins';
