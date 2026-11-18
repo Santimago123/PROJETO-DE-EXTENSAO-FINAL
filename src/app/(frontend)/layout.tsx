@@ -12,6 +12,22 @@ const description =
 const favicon = makeSiteSettings.icons?.icon
 const socialImage = makeSiteSettings.openGraph?.image
 const googleAnalyticsId = sanitizeHtmlAttribute(makeSiteSettings.analytics?.googleAnalyticsId)
+const figmaPreviewErrorGuard = `
+window.addEventListener("error", function (event) {
+  var message = event.message || "";
+  var source = event.filename || "";
+  var stack = event.error && event.error.stack ? String(event.error.stack) : "";
+  var isModifierStateError = message.indexOf("getModifierState is not a function") !== -1;
+  var isFigmaPreviewBundle =
+    source.indexOf("make_git_preview_iframe_bundle") !== -1 ||
+    stack.indexOf("make_git_preview_iframe_bundle") !== -1;
+
+  if (isModifierStateError && isFigmaPreviewBundle) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+}, true);
+`
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -44,6 +60,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {renderHeadCustomCode(customScripts?.headEnd, 'head-end')}
       </head>
       <body className="min-h-screen bg-white text-zinc-950 antialiased">
+        <Script id="figma-preview-error-guard" strategy="beforeInteractive">
+          {figmaPreviewErrorGuard}
+        </Script>
         <BodyCustomCode html={customScripts?.bodyStart} />
         {addBypassLinks && (
           <a className="figma-bypass-link" href="#root">
