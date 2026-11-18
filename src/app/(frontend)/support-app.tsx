@@ -215,13 +215,14 @@ export function SupportApp({ initialUser, initialRequests }: Props) {
                   value={authEmail}
                   onChange={setAuthEmail}
                 />
-                <Field
+                <PasswordField
+                  key={mode}
                   label="Senha"
                   name="password"
-                  type="password"
                   placeholder="Mínimo de 6 caracteres"
                   value={authPassword}
                   onChange={setAuthPassword}
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 />
                 {mode === 'login' && (
                   <div className="text-right">
@@ -749,6 +750,51 @@ function Field({
         onChange={onChange ? (event) => onChange(event.target.value) : undefined}
         className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 font-normal outline-none transition focus:border-[#4169E1] focus:bg-white"
       />
+    </label>
+  )
+}
+
+function PasswordField({
+  label,
+  name,
+  placeholder,
+  value,
+  onChange,
+  autoComplete,
+}: {
+  label: string
+  name: string
+  placeholder: string
+  value: string
+  onChange: (value: string) => void
+  autoComplete: 'current-password' | 'new-password'
+}) {
+  const [isVisible, setIsVisible] = useState(false)
+
+  return (
+    <label className="block text-sm font-semibold">
+      {label}
+      <div className="relative mt-2">
+        <input
+          required
+          name={name}
+          type={isVisible ? 'text' : 'password'}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-4 pr-20 font-normal outline-none transition focus:border-[#4169E1] focus:bg-white"
+        />
+        <button
+          type="button"
+          aria-label={isVisible ? 'Ocultar senha' : 'Mostrar senha'}
+          aria-pressed={isVisible}
+          onClick={() => setIsVisible((visible) => !visible)}
+          className="absolute inset-y-0 right-0 px-4 text-sm font-semibold text-[#4169E1] hover:text-[#3155c6] focus-visible:rounded-r-xl focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#4169E1]"
+        >
+          {isVisible ? 'Ocultar' : 'Mostrar'}
+        </button>
+      </div>
     </label>
   )
 }
