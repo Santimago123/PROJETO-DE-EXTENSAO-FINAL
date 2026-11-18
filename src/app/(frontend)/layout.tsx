@@ -12,20 +12,6 @@ const description =
 const favicon = makeSiteSettings.icons?.icon
 const socialImage = makeSiteSettings.openGraph?.image
 const googleAnalyticsId = sanitizeHtmlAttribute(makeSiteSettings.analytics?.googleAnalyticsId)
-const figmaPreviewErrorGuard = `
-window.addEventListener("error", function (event) {
-  var source = event.filename || "";
-  var message = event.message || "";
-  var isFigmaPreviewShortcutError =
-    message.indexOf("getModifierState is not a function") !== -1 &&
-    source.indexOf("figma.com/webpack-artifacts/assets/make_git_preview_iframe_bundle") !== -1;
-
-  if (isFigmaPreviewShortcutError) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  }
-}, true);
-`
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -54,9 +40,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={language}>
       <head>
-        <Script id="figma-preview-error-guard" strategy="beforeInteractive">
-          {figmaPreviewErrorGuard}
-        </Script>
         {renderHeadCustomCode(customScripts?.headStart, 'head-start')}
         {renderHeadCustomCode(customScripts?.headEnd, 'head-end')}
       </head>
