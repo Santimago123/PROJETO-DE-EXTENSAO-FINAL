@@ -37,6 +37,7 @@ export const Users: CollectionConfig = {
     create: () => true,
     read: ({ req }) => {
       if (req.user?.collection === 'admins') return true
+      if (req.user?.collection === 'operators') return true
       if (req.user?.collection === 'users') return { id: { equals: req.user.id } }
       return false
     },

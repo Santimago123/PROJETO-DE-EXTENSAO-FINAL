@@ -8,6 +8,7 @@ import { Media } from './collections/Media'
 import { Folders } from './collections/Folders'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
+import { Operators } from './collections/Operators'
 import { RequestFiles } from './collections/RequestFiles'
 import { ServiceRequests } from './collections/ServiceRequests'
 import { resendEmailAdapter } from './lib/resend-email-adapter'
@@ -35,7 +36,7 @@ export default buildFigmaConfig({
     fallbackLanguage: 'en',
     supportedLanguages: { en: adminLanguage },
   },
-  collections: [Admins, Users, ServiceRequests, RequestFiles, Media, Folders, Tags],
+  collections: [Admins, Users, Operators, ServiceRequests, RequestFiles, Media, Folders, Tags],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

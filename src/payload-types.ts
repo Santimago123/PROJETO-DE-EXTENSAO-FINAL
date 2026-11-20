@@ -77,11 +77,13 @@ export interface Config {
   auth: {
     admins: AdminAuthOperations;
     users: UserAuthOperations;
+    operators: OperatorAuthOperations;
   };
   blocks: {};
   collections: {
     admins: Admin;
     users: User;
+    operators: Operator;
     'service-requests': ServiceRequest;
     'request-files': RequestFile;
     media: Media;
@@ -97,6 +99,7 @@ export interface Config {
   collectionsSelect: {
     admins: AdminsSelect<false> | AdminsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    operators: OperatorsSelect<false> | OperatorsSelect<true>;
     'service-requests': ServiceRequestsSelect<false> | ServiceRequestsSelect<true>;
     'request-files': RequestFilesSelect<false> | RequestFilesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -122,7 +125,7 @@ export interface Config {
     activity: ActivityWidget;
     'upload-dropzone': UploadDropzoneWidget;
   };
-  user: Admin | User;
+  user: Admin | User | Operator;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -164,6 +167,24 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface OperatorAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "admins".
@@ -183,6 +204,10 @@ export interface Admin {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedBy?:
     | ({
@@ -192,6 +217,10 @@ export interface Admin {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedAt: string;
   createdAt: string;
@@ -213,6 +242,10 @@ export interface User {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedBy?:
     | ({
@@ -222,6 +255,10 @@ export interface User {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedAt: string;
   createdAt: string;
@@ -244,7 +281,62 @@ export interface User {
   collection: 'users';
 }
 /**
- * Clique no protocolo para abrir o chamado e atualizar o status.
+ * Contas dos funcionários que acessam o portal /operador.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "operators".
+ */
+export interface Operator {
+  id: string;
+  name: string;
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'operators';
+}
+/**
+ * Clique no protocolo para visualizar todos os detalhes, fotos e atualizar o status.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "service-requests".
@@ -261,6 +353,9 @@ export interface ServiceRequest {
   whatsapp?: string | null;
   deviceModel?: string | null;
   operatingSystem?: string | null;
+  /**
+   * Abra uma foto para visualizá-la em tamanho completo.
+   */
   photos: (string | RequestFile)[];
   address: {
     street: string;
@@ -280,6 +375,10 @@ export interface ServiceRequest {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedBy?:
     | ({
@@ -289,11 +388,17 @@ export interface ServiceRequest {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Fotos organizadas por protocolo da ordem de serviço.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "request-files".
  */
@@ -301,57 +406,12 @@ export interface RequestFile {
   id: string;
   alt: string;
   owner: string | User;
-  prefix?: string | null;
-  _objectKey?: string | null;
-  createdBy?:
-    | ({
-        relationTo: 'admins';
-        value: string | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'admins';
-        value: string | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null);
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  original?: {
-    filename?: string | null;
-    url?: string | null;
-    mimeType?: string | null;
-    filesize?: number | null;
-    width?: number | null;
-    height?: number | null;
-    prefix?: string | null;
-    _objectKey?: string | null;
-  };
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
+  /**
+   * Ordem de serviço à qual esta foto pertence.
+   */
+  serviceRequest?: (string | null) | ServiceRequest;
+  requestProtocol?: string | null;
   _h_folders?: (string | null) | Folder;
-  _h_tags?: (string | Tag)[] | null;
   prefix?: string | null;
   _objectKey?: string | null;
   createdBy?:
@@ -362,6 +422,10 @@ export interface Media {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedBy?:
     | ({
@@ -371,6 +435,10 @@ export interface Media {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedAt: string;
   createdAt: string;
@@ -410,6 +478,10 @@ export interface Folder {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedBy?:
     | ({
@@ -419,11 +491,74 @@ export interface Folder {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  _h_folders?: (string | null) | Folder;
+  _h_tags?: (string | Tag)[] | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -441,6 +576,10 @@ export interface Tag {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedBy?:
     | ({
@@ -450,6 +589,10 @@ export interface Tag {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedAt: string;
   createdAt: string;
@@ -489,6 +632,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'operators';
+        value: string | Operator;
+      } | null)
+    | ({
         relationTo: 'service-requests';
         value: string | ServiceRequest;
       } | null)
@@ -517,6 +664,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'users';
         value: string | User;
+      }
+    | {
+        relationTo: 'operators';
+        value: string | Operator;
       };
   updatedAt: string;
   createdAt: string;
@@ -535,6 +686,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'users';
         value: string | User;
+      }
+    | {
+        relationTo: 'operators';
+        value: string | Operator;
       };
   key?: string | null;
   value?:
@@ -579,6 +734,10 @@ export interface PayloadLlmInstruction {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedBy?:
     | ({
@@ -588,6 +747,10 @@ export interface PayloadLlmInstruction {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
       } | null);
   updatedAt: string;
   createdAt: string;
@@ -614,6 +777,32 @@ export interface AdminsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   phone?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "operators_select".
+ */
+export interface OperatorsSelect<T extends boolean = true> {
+  name?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -671,6 +860,9 @@ export interface ServiceRequestsSelect<T extends boolean = true> {
 export interface RequestFilesSelect<T extends boolean = true> {
   alt?: T;
   owner?: T;
+  serviceRequest?: T;
+  requestProtocol?: T;
+  _h_folders?: T;
   prefix?: T;
   _objectKey?: T;
   createdBy?: T;
@@ -846,7 +1038,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'admins' | 'service-requests' | 'request-files' | 'media' | 'folders' | 'tags';
+    relatedCollection: 'admins' | 'operators' | 'service-requests' | 'request-files' | 'media' | 'folders' | 'tags';
     where?:
       | {
           [k: string]: unknown;
@@ -868,7 +1060,8 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('admins' | 'service-requests' | 'request-files' | 'media' | 'folders' | 'tags')[] | null;
+    excludedCollections?:
+      ('admins' | 'operators' | 'service-requests' | 'request-files' | 'media' | 'folders' | 'tags')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
