@@ -1,3 +1,4 @@
+import { createFolderField } from 'payload'
 import type { Access, CollectionConfig } from 'payload'
 
 const ownFiles: Access = ({ req }) => {
@@ -18,6 +19,8 @@ export const RequestFiles: CollectionConfig = {
   admin: {
     group: 'Atendimento',
     useAsTitle: 'alt',
+    defaultColumns: ['requestProtocol', 'alt', 'createdAt'],
+    description: 'Fotos organizadas por protocolo da ordem de serviço.',
   },
   access: {
     create: ({ req }) => req.user?.collection === 'users' || req.user?.collection === 'admins',
@@ -28,15 +31,19 @@ export const RequestFiles: CollectionConfig = {
   fields: [
     {
       name: 'alt',
+      label: 'Descrição da foto',
       type: 'text',
       required: true,
+      admin: { readOnly: true },
     },
     {
       name: 'owner',
+      label: 'Consumidor',
       type: 'relationship',
       relationTo: 'users',
       required: true,
       index: true,
+      admin: { readOnly: true },
       access: {
         create: () => false,
         update: () => false,
@@ -47,6 +54,33 @@ export const RequestFiles: CollectionConfig = {
         ],
       },
     },
+    {
+      name: 'serviceRequest',
+      label: 'Chamado',
+      type: 'relationship',
+      relationTo: 'service-requests',
+      index: true,
+      admin: {
+        readOnly: true,
+        description: 'Ordem de serviço à qual esta foto pertence.',
+      },
+      access: {
+        create: () => false,
+        update: () => false,
+      },
+    },
+    {
+      name: 'requestProtocol',
+      label: 'Pasta / Protocolo',
+      type: 'text',
+      virtual: 'serviceRequest.protocol',
+      admin: { readOnly: true },
+    },
+    createFolderField({
+      relationTo: 'folders',
+      label: 'Pasta do chamado',
+      admin: { readOnly: true },
+    }),
   ],
   upload: {
     mimeTypes: ['image/*'],

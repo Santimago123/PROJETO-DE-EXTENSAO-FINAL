@@ -336,7 +336,7 @@ export interface Operator {
   collection: 'operators';
 }
 /**
- * Clique no protocolo para abrir o chamado e atualizar o status.
+ * Clique no protocolo para visualizar todos os detalhes, fotos e atualizar o status.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "service-requests".
@@ -353,6 +353,9 @@ export interface ServiceRequest {
   whatsapp?: string | null;
   deviceModel?: string | null;
   operatingSystem?: string | null;
+  /**
+   * Abra uma foto para visualizá-la em tamanho completo.
+   */
   photos: (string | RequestFile)[];
   address: {
     street: string;
@@ -394,6 +397,8 @@ export interface ServiceRequest {
   createdAt: string;
 }
 /**
+ * Fotos organizadas por protocolo da ordem de serviço.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "request-files".
  */
@@ -401,65 +406,12 @@ export interface RequestFile {
   id: string;
   alt: string;
   owner: string | User;
-  prefix?: string | null;
-  _objectKey?: string | null;
-  createdBy?:
-    | ({
-        relationTo: 'admins';
-        value: string | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'operators';
-        value: string | Operator;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'admins';
-        value: string | Admin;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'operators';
-        value: string | Operator;
-      } | null);
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  original?: {
-    filename?: string | null;
-    url?: string | null;
-    mimeType?: string | null;
-    filesize?: number | null;
-    width?: number | null;
-    height?: number | null;
-    prefix?: string | null;
-    _objectKey?: string | null;
-  };
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
+  /**
+   * Ordem de serviço à qual esta foto pertence.
+   */
+  serviceRequest?: (string | null) | ServiceRequest;
+  requestProtocol?: string | null;
   _h_folders?: (string | null) | Folder;
-  _h_tags?: (string | Tag)[] | null;
   prefix?: string | null;
   _objectKey?: string | null;
   createdBy?:
@@ -548,6 +500,65 @@ export interface Folder {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  _h_folders?: (string | null) | Folder;
+  _h_tags?: (string | Tag)[] | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'operators';
+        value: string | Operator;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -849,6 +860,9 @@ export interface ServiceRequestsSelect<T extends boolean = true> {
 export interface RequestFilesSelect<T extends boolean = true> {
   alt?: T;
   owner?: T;
+  serviceRequest?: T;
+  requestProtocol?: T;
+  _h_folders?: T;
   prefix?: T;
   _objectKey?: T;
   createdBy?: T;

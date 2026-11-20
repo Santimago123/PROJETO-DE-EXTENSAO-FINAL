@@ -52,6 +52,7 @@ function Detail({ label, value }: { label: string; value: string }) {
 
 function RequestCard({ request }: { request: OperatorRequestView }) {
   const router = useRouter()
+  const [expanded, setExpanded] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<OperatorStatus>(request.status)
   const [feedback, setFeedback] = useState<OperatorActionState | null>(null)
   const [pending, startTransition] = useTransition()
@@ -65,134 +66,170 @@ function RequestCard({ request }: { request: OperatorRequestView }) {
     .join(' — ')
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-5 py-5 sm:px-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-lg bg-[#4169E1]/10 px-2.5 py-1 text-xs font-bold text-[#4169E1]">
-                OS {request.protocol}
-              </span>
-              <span className="text-xs font-medium text-slate-400">
-                Aberto em {formatDate(request.createdAt, true)}
-              </span>
-            </div>
-            <h2 className="mt-3 text-xl font-semibold tracking-tight">
-              {categoryNames[request.category] || request.category}
-            </h2>
-          </div>
+    <article className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      <button
+        type="button"
+        aria-expanded={expanded}
+        aria-controls={`request-${request.id}`}
+        onClick={() => setExpanded((current) => !current)}
+        className={`flex w-full min-w-0 items-center justify-between gap-4 px-5 py-5 text-left transition hover:bg-slate-50 sm:px-7 ${
+          expanded ? 'border-b border-slate-100' : ''
+        }`}
+      >
+        <span className="min-w-0">
+          <span className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="rounded-lg bg-[#4169E1]/10 px-2.5 py-1 text-xs font-bold text-[#4169E1]">
+              OS {request.protocol}
+            </span>
+            <span className="text-xs font-medium text-slate-400">
+              Aberto em {formatDate(request.createdAt, true)}
+            </span>
+          </span>
+          <span className="mt-3 block truncate text-base font-semibold tracking-tight sm:text-xl">
+            {categoryNames[request.category] || request.category}
+          </span>
+        </span>
+        <span className="flex shrink-0 items-center gap-3">
           <span
-            className={`inline-flex w-fit rounded-full px-3 py-1.5 text-xs font-bold ring-1 ring-inset ${statusStyles[request.status]}`}
+            className={`hidden rounded-full px-3 py-1.5 text-xs font-bold ring-1 ring-inset sm:inline-flex ${statusStyles[request.status]}`}
           >
             {statusOptions.find((option) => option.value === request.status)?.label}
           </span>
-        </div>
-      </div>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            fill="none"
+            className={`h-5 w-5 text-slate-400 transition-transform duration-200 ${
+              expanded ? 'rotate-180' : ''
+            }`}
+          >
+            <path
+              d="m5 7.5 5 5 5-5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </button>
 
-      <div className="grid gap-7 p-5 sm:p-7 lg:grid-cols-[1fr_0.8fr]">
-        <div className="space-y-7">
-          <section>
-            <h3 className="text-sm font-bold text-slate-900">Problema informado</h3>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-slate-600">
-              {request.description}
-            </p>
-          </section>
-
-          <dl className="grid gap-5 sm:grid-cols-2">
-            <Detail label="Cliente" value={request.customer.name} />
-            <Detail label="E-mail" value={request.customer.email} />
-            <Detail label="WhatsApp" value={request.whatsapp || request.customer.phone} />
-            <Detail label="Data solicitada" value={formatDate(request.scheduledFor)} />
-            <Detail label="Equipamento" value={request.deviceModel} />
-            <Detail label="Sistema operacional" value={request.operatingSystem} />
-          </dl>
-
-          <div className="rounded-xl bg-slate-50 p-4">
-            <Detail label="Endereço do atendimento" value={address} />
+      {expanded && (
+        <div id={`request-${request.id}`}>
+          <div className="border-b border-slate-100 px-5 py-3 sm:hidden">
+            <span
+              className={`inline-flex rounded-full px-3 py-1.5 text-xs font-bold ring-1 ring-inset ${statusStyles[request.status]}`}
+            >
+              {statusOptions.find((option) => option.value === request.status)?.label}
+            </span>
           </div>
-        </div>
 
-        <div>
-          <h3 className="text-sm font-bold text-slate-900">Fotos anexadas</h3>
-          {request.photos.length > 0 ? (
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              {request.photos.map((photo, index) => (
-                <a
-                  key={photo.id}
-                  href={photo.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200"
-                  aria-label={`Abrir foto ${index + 1} do chamado ${request.protocol}`}
-                >
-                  <Image
-                    src={photo.url}
-                    alt={photo.alt || `Foto ${index + 1} do chamado ${request.protocol}`}
-                    fill
-                    sizes="(max-width: 640px) 42vw, (max-width: 1024px) 25vw, 180px"
-                    className="object-cover transition duration-300 group-hover:scale-105"
-                  />
-                  <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/70 px-2 py-1 text-[10px] font-bold text-white">
-                    FOTO {index + 1}
-                  </span>
-                </a>
-              ))}
+          <div className="grid min-w-0 gap-7 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)]">
+            <div className="min-w-0 space-y-7">
+              <section>
+                <h3 className="text-sm font-bold text-slate-900">Problema informado</h3>
+                <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-slate-600">
+                  {request.description}
+                </p>
+              </section>
+
+              <dl className="grid min-w-0 gap-5 sm:grid-cols-2">
+                <Detail label="Cliente" value={request.customer.name} />
+                <Detail label="E-mail" value={request.customer.email} />
+                <Detail label="WhatsApp" value={request.whatsapp || request.customer.phone} />
+                <Detail label="Data solicitada" value={formatDate(request.scheduledFor)} />
+                <Detail label="Equipamento" value={request.deviceModel} />
+                <Detail label="Sistema operacional" value={request.operatingSystem} />
+              </dl>
+
+              <div className="min-w-0 rounded-xl bg-slate-50 p-4">
+                <Detail label="Endereço do atendimento" value={address} />
+              </div>
             </div>
-          ) : (
-            <p className="mt-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
-              Nenhuma foto disponível.
-            </p>
-          )}
-        </div>
-      </div>
 
-      <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-5 sm:px-7">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <label className="block text-sm font-semibold text-slate-700">
-            Atualizar status
-            <select
-              value={selectedStatus}
-              onChange={(event) => {
-                setSelectedStatus(event.target.value as OperatorStatus)
-                setFeedback(null)
-              }}
-              className="mt-2 block min-w-64 rounded-xl border border-slate-200 bg-white px-4 py-3 font-normal outline-none transition focus:border-[#4169E1] focus:ring-4 focus:ring-[#4169E1]/10"
-            >
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            {feedback?.message && (
-              <p
-                role="status"
-                className={`text-sm font-medium ${
-                  feedback.status === 'success' ? 'text-emerald-700' : 'text-red-700'
-                }`}
-              >
-                {feedback.message}
-              </p>
-            )}
-            <button
-              type="button"
-              disabled={pending || selectedStatus === request.status}
-              onClick={() =>
-                startTransition(async () => {
-                  const result = await updateRequestStatus(request.id, selectedStatus)
-                  setFeedback(result)
-                  if (result.status === 'success') router.refresh()
-                })
-              }
-              className="rounded-xl bg-[#4169E1] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#3458c7] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {pending ? 'Salvando...' : 'Salvar status'}
-            </button>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-slate-900">Fotos anexadas</h3>
+              {request.photos.length > 0 ? (
+                <div className="mt-3 grid min-w-0 grid-cols-2 gap-3">
+                  {request.photos.map((photo, index) => (
+                    <a
+                      key={photo.id}
+                      href={photo.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group relative aspect-[4/3] min-w-0 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-200"
+                      aria-label={`Abrir foto ${index + 1} do chamado ${request.protocol}`}
+                    >
+                      <Image
+                        src={photo.url}
+                        alt={photo.alt || `Foto ${index + 1} do chamado ${request.protocol}`}
+                        fill
+                        sizes="(max-width: 640px) 42vw, (max-width: 1024px) 25vw, 180px"
+                        className="object-cover transition duration-300 group-hover:scale-105"
+                      />
+                      <span className="absolute bottom-2 left-2 rounded-md bg-slate-950/70 px-2 py-1 text-[10px] font-bold text-white">
+                        FOTO {index + 1}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
+                  Nenhuma foto disponível.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="min-w-0 border-t border-slate-100 bg-slate-50/70 px-5 py-5 sm:px-7">
+            <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <label className="block min-w-0 max-w-full text-sm font-semibold text-slate-700 lg:w-80">
+                Atualizar status
+                <select
+                  value={selectedStatus}
+                  onChange={(event) => {
+                    setSelectedStatus(event.target.value as OperatorStatus)
+                    setFeedback(null)
+                  }}
+                  className="mt-2 block w-full min-w-0 max-w-full rounded-xl border border-slate-200 bg-white px-3 py-3 font-normal outline-none transition focus:border-[#4169E1] focus:ring-4 focus:ring-[#4169E1]/10 sm:px-4"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+                {feedback?.message && (
+                  <p
+                    role="status"
+                    className={`break-words text-sm font-medium ${
+                      feedback.status === 'success' ? 'text-emerald-700' : 'text-red-700'
+                    }`}
+                  >
+                    {feedback.message}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  disabled={pending || selectedStatus === request.status}
+                  onClick={() =>
+                    startTransition(async () => {
+                      const result = await updateRequestStatus(request.id, selectedStatus)
+                      setFeedback(result)
+                      if (result.status === 'success') router.refresh()
+                    })
+                  }
+                  className="w-full rounded-xl bg-[#4169E1] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#3458c7] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:min-w-36"
+                >
+                  {pending ? 'Salvando...' : 'Salvar status'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </article>
   )
 }
@@ -271,7 +308,7 @@ export function OperatorDashboard({
             </p>
           </div>
         ) : (
-          <div className="mt-8 space-y-6">
+          <div className="mt-8 min-w-0 space-y-4">
             {requests.map((request) => (
               <RequestCard key={request.id} request={request} />
             ))}
