@@ -4,11 +4,11 @@ import config from '@payload-config'
 import { cookies } from 'next/headers'
 import { getPayload } from 'payload'
 
-const COOKIE_NAME = 'app-session'
+type AppAuthCollection = 'users' | 'operators'
 
-export function createAppAuth(collection: 'users') {
+export function createAppAuth(collection: AppAuthCollection, cookieName: string) {
   async function currentUser() {
-    const token = (await cookies()).get(COOKIE_NAME)?.value
+    const token = (await cookies()).get(cookieName)?.value
     if (!token) return null
 
     try {
@@ -23,7 +23,7 @@ export function createAppAuth(collection: 'users') {
 
   async function setSession(token: string) {
     const cookieStore = await cookies()
-    cookieStore.set(COOKIE_NAME, token, {
+    cookieStore.set(cookieName, token, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
@@ -33,10 +33,11 @@ export function createAppAuth(collection: 'users') {
   }
 
   async function clearSession() {
-    (await cookies()).delete(COOKIE_NAME)
+    ;(await cookies()).delete(cookieName)
   }
 
   return { currentUser, setSession, clearSession }
 }
 
-export const appAuth = createAppAuth('users')
+export const appAuth = createAppAuth('users', 'app-session')
+export const operatorAuth = createAppAuth('operators', 'operator-session')

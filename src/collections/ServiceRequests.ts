@@ -1,11 +1,14 @@
-import type { Access, CollectionConfig } from 'payload'
+import type { Access, CollectionConfig, FieldAccess } from 'payload'
 import { getEarliestScheduleDate, isBusinessDate } from '../lib/scheduling'
 
 const ownRequests: Access = ({ req }) => {
   if (req.user?.collection === 'admins') return true
+  if (req.user?.collection === 'operators') return true
   if (req.user?.collection === 'users') return { customer: { equals: req.user.id } }
   return false
 }
+
+const adminUpdate: FieldAccess = ({ req }) => req.user?.collection === 'admins'
 
 export const ServiceRequests: CollectionConfig = {
   slug: 'service-requests',
@@ -25,7 +28,7 @@ export const ServiceRequests: CollectionConfig = {
   access: {
     create: ({ req }) => req.user?.collection === 'users',
     read: ownRequests,
-    update: ({ req }) => req.user?.collection === 'admins',
+    update: ({ req }) => req.user?.collection === 'admins' || req.user?.collection === 'operators',
     delete: ({ req }) => req.user?.collection === 'admins',
   },
   hooks: {
@@ -83,6 +86,7 @@ export const ServiceRequests: CollectionConfig = {
       type: 'select',
       required: true,
       admin: { disabled: true },
+      access: { update: adminUpdate },
       options: [
         { label: 'Computador / Notebook', value: 'computer' },
         { label: 'Internet / Wi-Fi / Roteador', value: 'network' },
@@ -96,6 +100,7 @@ export const ServiceRequests: CollectionConfig = {
       type: 'textarea',
       required: true,
       admin: { disabled: true },
+      access: { update: adminUpdate },
     },
     {
       name: 'whatsapp',
@@ -104,9 +109,20 @@ export const ServiceRequests: CollectionConfig = {
         disabled: true,
         description: 'Contato usado para negociar o horário do atendimento.',
       },
+      access: { update: adminUpdate },
     },
-    { name: 'deviceModel', type: 'text', admin: { disabled: true } },
-    { name: 'operatingSystem', type: 'text', admin: { disabled: true } },
+    {
+      name: 'deviceModel',
+      type: 'text',
+      admin: { disabled: true },
+      access: { update: adminUpdate },
+    },
+    {
+      name: 'operatingSystem',
+      type: 'text',
+      admin: { disabled: true },
+      access: { update: adminUpdate },
+    },
     {
       name: 'photos',
       type: 'relationship',
@@ -116,11 +132,13 @@ export const ServiceRequests: CollectionConfig = {
       minRows: 5,
       maxRows: 5,
       admin: { disabled: true },
+      access: { update: adminUpdate },
     },
     {
       name: 'address',
       type: 'group',
       admin: { disabled: true },
+      access: { update: adminUpdate },
       fields: [
         { name: 'street', type: 'text', required: true },
         { name: 'number', type: 'text', required: true },
@@ -140,6 +158,7 @@ export const ServiceRequests: CollectionConfig = {
           pickerAppearance: 'dayOnly',
         },
       },
+      access: { update: adminUpdate },
     },
     {
       name: 'status',
@@ -147,7 +166,11 @@ export const ServiceRequests: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'received',
-      access: { create: () => false, update: ({ req }) => req.user?.collection === 'admins' },
+      access: {
+        create: () => false,
+        update: ({ req }) =>
+          req.user?.collection === 'admins' || req.user?.collection === 'operators',
+      },
       options: [
         { label: 'Solicitação recebida', value: 'received' },
         { label: 'Concluída', value: 'completed' },

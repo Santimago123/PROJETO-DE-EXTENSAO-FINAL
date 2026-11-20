@@ -6,6 +6,13 @@ const ownFiles: Access = ({ req }) => {
   return false
 }
 
+const readableFiles: Access = ({ req }) => {
+  if (req.user?.collection === 'admins') return true
+  if (req.user?.collection === 'operators') return true
+  if (req.user?.collection === 'users') return { owner: { equals: req.user.id } }
+  return false
+}
+
 export const RequestFiles: CollectionConfig = {
   slug: 'request-files',
   admin: {
@@ -14,7 +21,7 @@ export const RequestFiles: CollectionConfig = {
   },
   access: {
     create: ({ req }) => req.user?.collection === 'users' || req.user?.collection === 'admins',
-    read: ownFiles,
+    read: readableFiles,
     update: ownFiles,
     delete: ownFiles,
   },
@@ -36,12 +43,16 @@ export const RequestFiles: CollectionConfig = {
       },
       hooks: {
         beforeChange: [
-          ({ req, value }) => req.user?.collection === 'users' ? req.user.id : value,
+          ({ req, value }) => (req.user?.collection === 'users' ? req.user.id : value),
         ],
       },
     },
   ],
   upload: {
     mimeTypes: ['image/*'],
+    modifyResponseHeaders: ({ headers }) => {
+      headers.set('Cache-Control', 'private, no-store')
+      return headers
+    },
   },
 }
